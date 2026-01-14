@@ -182,6 +182,8 @@ Isso inicia:
 mvn spring-boot:run
 ```
 
+As migrations do banco de dados são executadas automaticamente na inicialização via Flyway.
+
 ### Opção 2: Configuração Manual
 
 1. **Iniciar o Simulador:**
