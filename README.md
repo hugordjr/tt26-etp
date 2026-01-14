@@ -161,24 +161,60 @@ Response
 ### Pre-requisitos
 
 - Java 21
-- MySQL 8.x
-- Docker (para o simulador)
+- Maven 3.8+
+- Docker e Docker Compose
 
-### Iniciar o Simulador
+### Opção 1: Usando Docker Compose (Recomendado)
+
+1. **Iniciar MySQL e Simulador via Docker Compose:**
+
+```bash
+docker-compose up -d
+```
+
+Isso inicia:
+- MySQL 8.0 na porta 3306
+- Simulador da garagem na porta 8080
+
+2. **Executar a aplicação:**
+
+```bash
+mvn spring-boot:run
+```
+
+### Opção 2: Configuração Manual
+
+1. **Iniciar o Simulador:**
 
 ```bash
 docker run -d --network="host" cfontes0estapar/garage-sim:1.0.0
 ```
 
-### Configurar o Banco de Dados
+2. **Configurar o Banco de Dados MySQL:**
 
-Criar banco de dados MySQL e configurar em `application.yml`.
+Criar banco de dados MySQL e configurar em `application.yml` ou via variáveis de ambiente.
 
-### Executar a Aplicacao
+3. **Executar a Aplicação:**
 
 ```bash
-./gradlew bootRun
+mvn spring-boot:run
 ```
+
+### Variáveis de Ambiente (Opcional)
+
+Você pode criar um arquivo `.env` ou exportar variáveis:
+
+```bash
+export MYSQL_HOST=localhost
+export MYSQL_PORT=3306
+export MYSQL_DATABASE=parking
+export MYSQL_USERNAME=root
+export MYSQL_PASSWORD=root
+export SIMULATOR_BASE_URL=http://localhost:8080
+export SERVER_PORT=3003
+```
+
+Para mais detalhes sobre Docker, consulte [docker/README.md](docker/README.md).
 
 ## API Endpoints
 
