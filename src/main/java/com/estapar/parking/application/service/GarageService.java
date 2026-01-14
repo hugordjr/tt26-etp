@@ -42,7 +42,26 @@ public class GarageService {
       return;
     }
 
-    GarageConfigResponse response = garageClient.fetchConfig();
+    GarageConfigResponse response;
+    try {
+      response = garageClient.fetchConfig();
+    } catch (org.springframework.web.client.ResourceAccessException e) {
+      log.warn(
+          "nao foi possivel conectar ao simulador. A aplicacao continuara sem dados iniciais. "
+              + "Verifique: 1) Simulador rodando (docker ps | grep simulator), "
+              + "2) Porta 8080 acessivel (curl http://localhost:8080/garage), "
+              + "3) Docker network configurada corretamente. "
+              + "Erro: {}",
+          e.getMessage());
+      return;
+    } catch (Exception e) {
+      log.warn(
+          "erro ao buscar configuracao do simulador. Aplicacao continuara sem dados iniciais. "
+              + "Erro: {}",
+          e.getMessage());
+      return;
+    }
+
     if (response == null || response.getGarage() == null || response.getSpots() == null) {
       log.warn("resposta do simulador vazia, nao foi possivel inicializar garagem");
       return;

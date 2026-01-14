@@ -23,6 +23,34 @@ public class GarageClient {
   public GarageConfigResponse fetchConfig() {
     var url = baseUrl + "/garage";
     log.info("buscando configuracao da garagem em {}", url);
-    return restTemplate.getForObject(url, GarageConfigResponse.class);
+    try {
+      return restTemplate.getForObject(url, GarageConfigResponse.class);
+    } catch (org.springframework.web.client.ResourceAccessException e) {
+      log.error(
+          "erro de conexao com simulador em {}. Verifique se o simulador esta rodando e acessivel. Erro: {}",
+          url,
+          e.getMessage());
+      throw e;
+    } catch (org.springframework.web.client.HttpClientErrorException e) {
+      log.error(
+          "erro HTTP ao buscar configuracao do simulador. Status: {}, Response: {}",
+          e.getStatusCode(),
+          e.getResponseBodyAsString());
+      throw e;
+    }
+  }
+
+  public boolean isAvailable() {
+    try {
+      var url = baseUrl + "/garage";
+      var response = restTemplate.getForEntity(url, Object.class);
+      return response.getStatusCode().is2xxSuccessful();
+    } catch (org.springframework.web.client.ResourceAccessException e) {
+      log.debug("simulador nao acessivel em {}: {}", baseUrl, e.getMessage());
+      return false;
+    } catch (Exception e) {
+      log.debug("erro ao verificar disponibilidade do simulador: {}", e.getMessage());
+      return false;
+    }
   }
 }

@@ -204,8 +204,9 @@ mvn spring-boot:run
 
 ### Variáveis de Ambiente (Opcional)
 
-Você pode criar um arquivo `.env` ou exportar variáveis:
+A aplicação suporta variáveis de ambiente para sobrescrever configurações. Exporte as variáveis antes de executar:
 
+**Linux/Mac:**
 ```bash
 export MYSQL_HOST=localhost
 export MYSQL_PORT=3306
@@ -216,9 +217,48 @@ export SIMULATOR_BASE_URL=http://localhost:8080
 export SERVER_PORT=3003
 ```
 
+**Windows (PowerShell):**
+```powershell
+$env:MYSQL_HOST="localhost"
+$env:MYSQL_PORT="3306"
+$env:MYSQL_DATABASE="parking"
+$env:MYSQL_USERNAME="root"
+$env:MYSQL_PASSWORD="root"
+$env:SIMULATOR_BASE_URL="http://localhost:8080"
+$env:SERVER_PORT="3003"
+```
+
+Alternativamente, você pode criar um profile Spring Boot (`application-{profile}.yml`) para diferentes ambientes.
+
 Para mais detalhes sobre Docker, consulte [docker/README.md](docker/README.md).
 
 ## API Endpoints
+
+### Health Check
+
+- GET `/health` - Verifica o status da aplicacao, banco de dados e simulador
+
+**Response:**
+```json
+{
+  "status": "UP",
+  "timestamp": "2025-01-14T19:30:00.000Z",
+  "application": {
+    "status": "UP",
+    "message": "Aplicacao em execucao"
+  },
+  "database": {
+    "status": "UP",
+    "message": "Conexao com banco de dados OK"
+  },
+  "simulator": {
+    "status": "UP",
+    "message": "Simulador acessivel"
+  }
+}
+```
+
+O status geral sera `UP` apenas se todos os componentes estiverem funcionando. Caso contrario, retornara `DOWN`.
 
 ### Webhook
 
@@ -227,3 +267,10 @@ Para mais detalhes sobre Docker, consulte [docker/README.md](docker/README.md).
 ### Consulta de Receita
 
 - GET `/revenue?date=2025-01-01&sector=A` - Consulta receita por data e setor
+
+## Documentacao da API
+
+A documentacao completa da API esta disponivel via Swagger UI:
+
+- **Swagger UI**: http://localhost:3003/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:3003/v3/api-docs
