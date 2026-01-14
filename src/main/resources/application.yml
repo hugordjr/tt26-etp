@@ -1,0 +1,35 @@
+server:
+  port: 3003
+
+spring:
+  application:
+    name: parking
+  datasource:
+    url: jdbc:mysql://localhost:3306/parking
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+simulator:
+  base-url: http://localhost:8080
+
+logging:
+  level:
+    com.estapar.parking: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
