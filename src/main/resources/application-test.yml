@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${TEST_DATASOURCE_URL}
+    username: ${TEST_DATASOURCE_USERNAME:test}
+    password: ${TEST_DATASOURCE_PASSWORD:test}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    clean-disabled: false
+
+logging:
+  level:
+    com.estapar.parking: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+    org.testcontainers: INFO
