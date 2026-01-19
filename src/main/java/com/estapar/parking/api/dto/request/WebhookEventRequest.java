@@ -1,7 +1,7 @@
 package com.estapar.parking.api.dto.request;
 
 import com.estapar.parking.domain.enums.EventType;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
@@ -12,10 +12,10 @@ public class WebhookEventRequest {
 
   @NotNull private EventType eventType;
 
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = OffsetDateTimeDeserializer.class)
   private OffsetDateTime entryTime;
 
-  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+  @JsonDeserialize(using = OffsetDateTimeDeserializer.class)
   private OffsetDateTime exitTime;
 
   private Double lat;

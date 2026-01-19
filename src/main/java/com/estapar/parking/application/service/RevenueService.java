@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +21,8 @@ public class RevenueService {
 
   private static final Logger log = LoggerFactory.getLogger(RevenueService.class);
 
-  private final RevenueRepository revenueRepository;
-  private final SectorRepository sectorRepository;
-
-  public RevenueService(RevenueRepository revenueRepository, SectorRepository sectorRepository) {
-    this.revenueRepository = revenueRepository;
-    this.sectorRepository = sectorRepository;
-  }
+  @Autowired private RevenueRepository revenueRepository;
+  @Autowired private SectorRepository sectorRepository;
 
   @Transactional
   public void registerRevenue(Sector sector, LocalDate date, BigDecimal amount) {
@@ -65,6 +61,7 @@ public class RevenueService {
             .map(Revenue::getTimestamp)
             .orElse(OffsetDateTime.now());
 
+    log.debug("consulta de receita: date={}, sector={}, amount={}", date, sectorCode, amount);
     return new RevenueResponse(amount, "BRL", timestamp);
   }
 }

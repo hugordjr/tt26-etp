@@ -14,8 +14,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,24 +26,11 @@ public class VehicleService {
 
   private static final Logger log = LoggerFactory.getLogger(VehicleService.class);
 
-  private final VehicleRepository vehicleRepository;
-  private final SpotRepository spotRepository;
-  private final SectorRepository sectorRepository;
-  private final PricingService pricingService;
-  private final RevenueService revenueService;
-
-  public VehicleService(
-      VehicleRepository vehicleRepository,
-      SpotRepository spotRepository,
-      SectorRepository sectorRepository,
-      PricingService pricingService,
-      RevenueService revenueService) {
-    this.vehicleRepository = vehicleRepository;
-    this.spotRepository = spotRepository;
-    this.sectorRepository = sectorRepository;
-    this.pricingService = pricingService;
-    this.revenueService = revenueService;
-  }
+  @Autowired private VehicleRepository vehicleRepository;
+  @Autowired private SpotRepository spotRepository;
+  @Autowired private SectorRepository sectorRepository;
+  @Autowired private PricingService pricingService;
+  @Autowired private RevenueService revenueService;
 
   @Transactional
   public void handleWebhook(WebhookEventRequest request) {
@@ -69,10 +58,7 @@ public class VehicleService {
               throw new BusinessException("veiculo ja esta na garagem");
             });
 
-    Spot spot =
-        spotRepository
-            .findFirstByOccupiedFalseOrderByIdAsc()
-            .orElseThrow(() -> new BusinessException("estacionamento lotado"));
+    Spot spot = findAvailableSpot();
 
     Sector sector = spot.getSector();
     long occupied = vehicleRepository.countBySectorIdAndStatusNot(sector.getId(), VehicleStatus.EXITED);
@@ -114,6 +100,7 @@ public class VehicleService {
       throw new BusinessException("exit_time obrigatorio");
     }
 
+    synchronizeSpotsState();
     Vehicle vehicle = getActiveVehicle(request.getLicensePlate());
     OffsetDateTime exitTime = request.getExitTime();
 
@@ -129,11 +116,16 @@ public class VehicleService {
 
     vehicle.setExitTime(exitTime);
     vehicle.setStatus(VehicleStatus.EXITED);
+    vehicleRepository.save(vehicle);
 
     Spot spot = vehicle.getSpot();
-    spot.setOccupied(false);
-    spotRepository.save(spot);
-    vehicleRepository.save(vehicle);
+    if (spot != null) {
+      spot.setOccupied(false);
+      spotRepository.save(spot);
+      log.debug("vaga {} liberada apos saida do veiculo {}", spot.getId(), vehicle.getLicensePlate());
+    } else {
+      log.warn("veiculo {} nao tem vaga associada ao sair", vehicle.getLicensePlate());
+    }
 
     revenueService.registerRevenue(vehicle.getSector(), exitTime.toLocalDate(), amount);
 
@@ -148,5 +140,63 @@ public class VehicleService {
     return vehicleRepository
         .findFirstByLicensePlateAndStatusNot(licensePlate, VehicleStatus.EXITED)
         .orElseThrow(() -> new BusinessException("veiculo nao encontrado na garagem"));
+  }
+
+  private Spot findAvailableSpot() {
+    Spot spot = spotRepository.findFirstByOccupiedFalseOrderByIdAsc().orElse(null);
+
+    if (spot == null) {
+      log.warn("nenhuma vaga livre encontrada, sincronizando estado das vagas");
+      synchronizeSpotsState();
+      spot = spotRepository.findFirstByOccupiedFalseOrderByIdAsc().orElse(null);
+    }
+
+    if (spot == null) {
+      long totalSpots = spotRepository.count();
+      long occupiedSpots = spotRepository.findAll().stream().filter(Spot::isOccupied).count();
+      long activeVehicles =
+          vehicleRepository.findAll().stream()
+              .filter(v -> v.getStatus() != VehicleStatus.EXITED)
+              .count();
+      log.error(
+          "estacionamento realmente lotado: total spots={}, occupied={}, vehicles active={}",
+          totalSpots,
+          occupiedSpots,
+          activeVehicles);
+      throw new BusinessException("estacionamento lotado");
+    }
+
+    return spot;
+  }
+
+  private void synchronizeSpotsState() {
+    List<Spot> allSpots = spotRepository.findAll();
+    int freedCount = 0;
+    int occupiedCount = 0;
+
+    for (Spot spot : allSpots) {
+      var vehicle =
+          vehicleRepository.findBySpotIdAndStatusNot(spot.getId(), VehicleStatus.EXITED);
+      
+      if (spot.isOccupied() && vehicle.isEmpty()) {
+        log.info(
+            "liberando vaga {} que estava marcada como ocupada sem veiculo ativo", spot.getId());
+        spot.setOccupied(false);
+        spotRepository.save(spot);
+        freedCount++;
+      } else if (!spot.isOccupied() && vehicle.isPresent()) {
+        log.info(
+            "marcando vaga {} como ocupada porque tem veiculo ativo {}", 
+            spot.getId(), vehicle.get().getLicensePlate());
+        spot.setOccupied(true);
+        spotRepository.save(spot);
+        occupiedCount++;
+      }
+    }
+
+    if (freedCount > 0 || occupiedCount > 0) {
+      log.info("sincronizacao concluida: {} vagas liberadas, {} vagas ocupadas", 
+          freedCount, occupiedCount);
+    }
   }
 }

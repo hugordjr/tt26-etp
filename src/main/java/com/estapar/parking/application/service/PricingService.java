@@ -2,22 +2,47 @@ package com.estapar.parking.application.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PricingService {
 
+  @Value("${pricing.occupancy-rate.threshold-low}")
+  private double occupancyRateThresholdLow;
+
+  @Value("${pricing.occupancy-rate.threshold-medium}")
+  private double occupancyRateThresholdMedium;
+
+  @Value("${pricing.occupancy-rate.threshold-high}")
+  private double occupancyRateThresholdHigh;
+
+  @Value("${pricing.price-factor.low}")
+  private BigDecimal priceFactorLow;
+
+  @Value("${pricing.price-factor.normal}")
+  private BigDecimal priceFactorNormal;
+
+  @Value("${pricing.price-factor.medium}")
+  private BigDecimal priceFactorMedium;
+
+  @Value("${pricing.price-factor.high}")
+  private BigDecimal priceFactorHigh;
+
+  @Value("${pricing.decimal-scale}")
+  private int decimalScale;
+
   public BigDecimal applyDynamicPrice(BigDecimal basePrice, double occupancyRate) {
     BigDecimal factor;
-    if (occupancyRate < 0.25) {
-      factor = BigDecimal.valueOf(0.9);
-    } else if (occupancyRate <= 0.5) {
-      factor = BigDecimal.ONE;
-    } else if (occupancyRate <= 0.75) {
-      factor = BigDecimal.valueOf(1.1);
+    if (occupancyRate < occupancyRateThresholdLow) {
+      factor = priceFactorLow;
+    } else if (occupancyRate <= occupancyRateThresholdMedium) {
+      factor = priceFactorNormal;
+    } else if (occupancyRate <= occupancyRateThresholdHigh) {
+      factor = priceFactorMedium;
     } else {
-      factor = BigDecimal.valueOf(1.25);
+      factor = priceFactorHigh;
     }
-    return basePrice.multiply(factor).setScale(2, RoundingMode.HALF_UP);
+    return basePrice.multiply(factor).setScale(decimalScale, RoundingMode.HALF_UP);
   }
 }

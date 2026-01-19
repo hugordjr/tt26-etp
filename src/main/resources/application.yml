@@ -33,8 +33,21 @@ springdoc:
 simulator:
   base-url: ${SIMULATOR_BASE_URL:http://localhost:8080}
 
+pricing:
+  occupancy-rate:
+    threshold-low: 0.25
+    threshold-medium: 0.5
+    threshold-high: 0.75
+  price-factor:
+    low: 0.9
+    normal: 1.0
+    medium: 1.1
+    high: 1.25
+  decimal-scale: 2
+
 logging:
   level:
     com.estapar.parking: INFO
+    com.estapar.parking.config.WebhookLoggingFilter: INFO
     org.springframework.web: INFO
     org.hibernate.SQL: WARN

@@ -232,6 +232,51 @@ Alternativamente, você pode criar um profile Spring Boot (`application-{profile
 
 Para mais detalhes sobre Docker, consulte [docker/README.md](docker/README.md).
 
+## Configurações
+
+### Configurações de Preço Dinâmico
+
+As regras de negócio para cálculo de preço dinâmico baseado em lotação estão configuráveis no arquivo `application.yml` através da seção `pricing`. Estas configurações podem ser ajustadas sem alterar o código.
+
+**Configurações disponíveis:**
+
+```yaml
+pricing:
+  occupancy-rate:
+    threshold-low: 0.25      # Limite inferior de lotação (25%)
+    threshold-medium: 0.5    # Limite médio de lotação (50%)
+    threshold-high: 0.75     # Limite superior de lotação (75%)
+  price-factor:
+    low: 0.9                 # Fator de desconto quando lotação < 25% (10% de desconto)
+    normal: 1.0              # Fator normal quando lotação entre 25% e 50% (preço base)
+    medium: 1.1              # Fator de aumento quando lotação entre 50% e 75% (10% de aumento)
+    high: 1.25               # Fator de aumento quando lotação > 75% (25% de aumento)
+  decimal-scale: 2           # Número de casas decimais para arredondamento
+```
+
+**Regras de aplicação:**
+
+1. **Lotação < 25%**: Preço base × `price-factor.low` (0.9 = 10% de desconto)
+2. **Lotação entre 25% e 50%**: Preço base × `price-factor.normal` (1.0 = preço base)
+3. **Lotação entre 50% e 75%**: Preço base × `price-factor.medium` (1.1 = 10% de aumento)
+4. **Lotação > 75%**: Preço base × `price-factor.high` (1.25 = 25% de aumento)
+
+**Exemplo de ajuste via variáveis de ambiente:**
+
+**Linux/Mac:**
+```bash
+export PRICING_OCCUPANCY_RATE_THRESHOLD_LOW=0.3
+export PRICING_PRICE_FACTOR_LOW=0.85
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:PRICING_OCCUPANCY_RATE_THRESHOLD_LOW="0.3"
+$env:PRICING_PRICE_FACTOR_LOW="0.85"
+```
+
+Nota: As variáveis de ambiente seguem o padrão Spring Boot, onde pontos (`.`) são substituídos por underscores (`_`) e as letras são convertidas para maiúsculas.
+
 ## API Endpoints
 
 ### Health Check

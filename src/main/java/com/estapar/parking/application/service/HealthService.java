@@ -7,6 +7,7 @@ import jakarta.persistence.PersistenceContext;
 import java.time.OffsetDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,11 +17,7 @@ public class HealthService {
 
   @PersistenceContext private EntityManager entityManager;
 
-  private final GarageClient garageClient;
-
-  public HealthService(GarageClient garageClient) {
-    this.garageClient = garageClient;
-  }
+  @Autowired private GarageClient garageClient;
 
   public HealthResponse checkHealth() {
     var applicationStatus = checkApplication();

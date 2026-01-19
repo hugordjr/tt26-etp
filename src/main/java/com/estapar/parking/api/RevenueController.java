@@ -4,6 +4,7 @@ import com.estapar.parking.api.dto.response.RevenueResponse;
 import com.estapar.parking.application.service.RevenueService;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -17,11 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 public class RevenueController {
 
-  private final RevenueService revenueService;
-
-  public RevenueController(RevenueService revenueService) {
-    this.revenueService = revenueService;
-  }
+  @Autowired private RevenueService revenueService;
 
   @GetMapping
   public ResponseEntity<RevenueResponse> getRevenue(

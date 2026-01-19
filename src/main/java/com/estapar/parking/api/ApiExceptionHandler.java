@@ -37,7 +37,11 @@ public class ApiExceptionHandler {
   public ResponseEntity<ErrorResponse> handleBusiness(
       BusinessException ex, HttpServletRequest request) {
     log.warn("regra de negocio: {}", ex.getMessage());
-    return buildResponse("BUSINESS_ERROR", ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY, request);
+    String message = ex.getMessage();
+    if ("veiculo nao encontrado na garagem".equals(message)) {
+      message = "Vehicle not found";
+    }
+    return buildResponse("BUSINESS_ERROR", message, HttpStatus.UNPROCESSABLE_ENTITY, request);
   }
 
   @ExceptionHandler(Exception.class)

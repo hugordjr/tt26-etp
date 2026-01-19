@@ -11,6 +11,7 @@ import com.estapar.parking.infrastructure.repository.SpotRepository;
 import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,21 +20,10 @@ public class GarageService {
 
   private static final Logger log = LoggerFactory.getLogger(GarageService.class);
 
-  private final GarageClient garageClient;
-  private final SectorRepository sectorRepository;
-  private final SpotRepository spotRepository;
-  private final GarageRepository garageRepository;
-
-  public GarageService(
-      GarageClient garageClient,
-      SectorRepository sectorRepository,
-      SpotRepository spotRepository,
-      GarageRepository garageRepository) {
-    this.garageClient = garageClient;
-    this.sectorRepository = sectorRepository;
-    this.spotRepository = spotRepository;
-    this.garageRepository = garageRepository;
-  }
+  @Autowired private GarageClient garageClient;
+  @Autowired private SectorRepository sectorRepository;
+  @Autowired private SpotRepository spotRepository;
+  @Autowired private GarageRepository garageRepository;
 
   @Transactional
   public void bootstrapGarage() {
