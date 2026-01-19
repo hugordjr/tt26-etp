@@ -1,0 +1,24 @@
+services:
+  parking-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parking-app
+    ports:
+      - "3003:3003"
+    environment:
+      - SERVER_PORT=3003
+      - MYSQL_HOST=parking-mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=parking
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=root
+      - SIMULATOR_BASE_URL=http://parking-simulator:3000
+    networks:
+      - parking-network
+    restart: unless-stopped
+
+networks:
+  parking-network:
+    name: tt26-etp_parking-network
+    external: true

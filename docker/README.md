@@ -7,7 +7,51 @@
 
 ## Como executar
 
-### 1. Iniciar MySQL e Simulador
+### Opção 1: Aplicação Java no Docker (Recomendado)
+
+#### 1. Iniciar MySQL e Simulador
+
+```bash
+docker-compose up -d
+```
+
+Isso irá iniciar:
+- MySQL 8.0 na porta 3306
+- Simulador da garagem na porta 8080
+
+#### 2. Construir e executar a aplicação Java
+
+```bash
+# Construir a imagem
+docker build -t parking-app .
+
+# Executar o container (conectando à rede do docker-compose)
+docker run -d \
+  --name parking-app \
+  --network tt26-etp_parking-network \
+  -p 3003:3003 \
+  -e MYSQL_HOST=parking-mysql \
+  -e MYSQL_PORT=3306 \
+  -e MYSQL_DATABASE=parking \
+  -e MYSQL_USERNAME=root \
+  -e MYSQL_PASSWORD=root \
+  -e SIMULATOR_BASE_URL=http://parking-simulator:3000 \
+  parking-app
+```
+
+Ou usando o docker-compose separado:
+
+```bash
+# Primeiro, certifique-se de que a rede existe
+docker-compose up -d
+
+# Depois, execute o docker-compose da aplicação
+docker-compose -f docker-compose.app.yml up -d
+```
+
+### Opção 2: Aplicação Java no Host (Desenvolvimento)
+
+#### 1. Iniciar MySQL e Simulador
 
 ```bash
 docker-compose up -d
@@ -20,13 +64,17 @@ Isso irá iniciar:
 ### 2. Verificar se os serviços estão rodando
 
 ```bash
+# Verificar serviços do docker-compose
 docker-compose ps
+
+# Verificar todos os containers (incluindo a aplicação)
+docker ps
 ```
 
 ### 3. Ver logs
 
 ```bash
-# Logs de todos os serviços
+# Logs de todos os serviços do docker-compose
 docker-compose logs -f
 
 # Logs apenas do MySQL
@@ -34,12 +82,23 @@ docker-compose logs -f mysql
 
 # Logs apenas do simulador
 docker-compose logs -f simulator
+
+# Logs da aplicação Java (se estiver rodando no Docker)
+docker logs -f parking-app
 ```
 
 ### 4. Parar os serviços
 
 ```bash
+# Parar serviços do docker-compose
 docker-compose down
+
+# Parar a aplicação Java (se estiver rodando no Docker)
+docker stop parking-app
+docker rm parking-app
+
+# Ou se usou docker-compose.app.yml
+docker-compose -f docker-compose.app.yml down
 ```
 
 ### 5. Parar e remover volumes (limpar dados)
@@ -60,7 +119,8 @@ O MySQL é configurado com:
 - **Senha**: parking
 
 O simulador está configurado para enviar eventos para:
-- **Webhook URL**: http://host.docker.internal:3003/webhook
+- **Webhook URL**: http://localhost:3003/webhook (quando a aplicação está no host)
+- **Webhook URL**: http://parking-app:3003/webhook (quando a aplicação está no Docker na mesma rede)
 
 ## Variáveis de Ambiente
 

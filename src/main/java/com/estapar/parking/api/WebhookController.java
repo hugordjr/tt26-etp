@@ -27,7 +27,14 @@ public class WebhookController {
 
   @PostMapping
   public ResponseEntity<Void> handleEvent(@Valid @RequestBody WebhookEventRequest request) {
-    log.info("webhook recebido: {}", request.getEventType());
+    log.info(
+        "webhook recebido: evento={}, placa={}, entryTime={}, exitTime={}, lat={}, lng={}",
+        request.getEventType(),
+        request.getLicensePlate(),
+        request.getEntryTime(),
+        request.getExitTime(),
+        request.getLat(),
+        request.getLng());
     vehicleService.handleWebhook(request);
     return ResponseEntity.ok().build();
   }
