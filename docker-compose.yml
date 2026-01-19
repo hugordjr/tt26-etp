@@ -22,11 +22,10 @@ services:
   simulator:
     image: cfontes0estapar/garage-sim:1.0.0
     container_name: parking-simulator
-    user: root
     ports:
       - "8080:3000"
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["sed -i '1i 192.168.0.241 localhost' /etc/hosts && exec /usr/local/bin/garage-simulator"]
+    extra_hosts:
+      - "localhost:192.168.0.241"
     networks:
       - parking-network
 
