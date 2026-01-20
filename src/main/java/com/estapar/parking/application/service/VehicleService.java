@@ -47,6 +47,10 @@ public class VehicleService {
   }
 
   private void processEntry(WebhookEventRequest request) {
+    if (request.getEntryTime() == null) {
+      throw new BusinessException("entry_time obrigatorio");
+    }
+
     vehicleRepository
         .findFirstByLicensePlateAndStatusNot(request.getLicensePlate(), VehicleStatus.EXITED)
         .ifPresent(
