@@ -24,6 +24,8 @@ services:
     container_name: parking-simulator
     ports:
       - "8080:3000"
+    extra_hosts:
+      - "localhost:192.168.0.241"
     networks:
       - parking-network
 
