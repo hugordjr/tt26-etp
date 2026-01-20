@@ -610,16 +610,32 @@ class WebhookE2ETest extends TestContainersConfig {
 
   @Test
   void deveBloquearEntradaQuandoEstacionamento100PorcentoLotado() {
-    Sector sector = sectorRepository.findByCode("A").orElseThrow();
+    Sector sectorA = sectorRepository.findByCode("A").orElseThrow();
+    Sector sectorB = sectorRepository.findByCode("B").orElseThrow();
 
+    int vehicleIndex = 0;
     for (int i = 0; i < 10; i++) {
       Spot spot = spotRepository.findFirstByOccupiedFalseOrderByIdAsc().orElseThrow();
       Vehicle vehicle = new Vehicle();
-      vehicle.setLicensePlate("PLATE" + i);
-      vehicle.setSector(sector);
+      vehicle.setLicensePlate("PLATE" + vehicleIndex++);
+      vehicle.setSector(sectorA);
       vehicle.setSpot(spot);
       vehicle.setEntryTime(OffsetDateTime.now().minusHours(1));
       vehicle.setAdjustedPrice(new BigDecimal("10.00"));
+      vehicle.setStatus(VehicleStatus.PARKED);
+      vehicleRepository.save(vehicle);
+      spot.setOccupied(true);
+      spotRepository.save(spot);
+    }
+
+    for (int i = 0; i < 20; i++) {
+      Spot spot = spotRepository.findFirstByOccupiedFalseOrderByIdAsc().orElseThrow();
+      Vehicle vehicle = new Vehicle();
+      vehicle.setLicensePlate("PLATE" + vehicleIndex++);
+      vehicle.setSector(sectorB);
+      vehicle.setSpot(spot);
+      vehicle.setEntryTime(OffsetDateTime.now().minusHours(1));
+      vehicle.setAdjustedPrice(new BigDecimal("20.00"));
       vehicle.setStatus(VehicleStatus.PARKED);
       vehicleRepository.save(vehicle);
       spot.setOccupied(true);

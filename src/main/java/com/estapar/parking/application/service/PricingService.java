@@ -34,14 +34,16 @@ public class PricingService {
 
   public BigDecimal applyDynamicPrice(BigDecimal basePrice, double occupancyRate) {
     BigDecimal factor;
-    if (occupancyRate < occupancyRateThresholdLow) {
-      factor = priceFactorLow;
-    } else if (occupancyRate <= occupancyRateThresholdMedium) {
-      factor = priceFactorNormal;
-    } else if (occupancyRate <= occupancyRateThresholdHigh) {
-      factor = priceFactorMedium;
+    if (occupancyRate == 0.0 || occupancyRate >= occupancyRateThresholdLow) {
+      if (occupancyRate <= occupancyRateThresholdMedium) {
+        factor = priceFactorNormal;
+      } else if (occupancyRate <= occupancyRateThresholdHigh) {
+        factor = priceFactorMedium;
+      } else {
+        factor = priceFactorHigh;
+      }
     } else {
-      factor = priceFactorHigh;
+      factor = priceFactorLow;
     }
     return basePrice.multiply(factor).setScale(decimalScale, RoundingMode.HALF_UP);
   }

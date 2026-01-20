@@ -47,10 +47,6 @@ public class VehicleService {
   }
 
   private void processEntry(WebhookEventRequest request) {
-    if (request.getEntryTime() == null) {
-      throw new BusinessException("entry_time obrigatorio");
-    }
-
     vehicleRepository
         .findFirstByLicensePlateAndStatusNot(request.getLicensePlate(), VehicleStatus.EXITED)
         .ifPresent(
@@ -158,8 +154,18 @@ public class VehicleService {
           vehicleRepository.findAll().stream()
               .filter(v -> v.getStatus() != VehicleStatus.EXITED)
               .count();
+
+      if (activeVehicles >= totalSpots) {
+        log.error(
+            "estacionamento realmente lotado: total spots={}, occupied={}, vehicles active={}",
+            totalSpots,
+            occupiedSpots,
+            activeVehicles);
+        throw new BusinessException("estacionamento lotado");
+      }
+
       log.error(
-          "estacionamento realmente lotado: total spots={}, occupied={}, vehicles active={}",
+          "nenhuma vaga disponivel apos sincronizacao: total spots={}, occupied={}, vehicles active={}",
           totalSpots,
           occupiedSpots,
           activeVehicles);

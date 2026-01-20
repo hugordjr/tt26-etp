@@ -13,11 +13,14 @@ import java.time.format.DateTimeParseException;
 public class OffsetDateTimeDeserializer extends JsonDeserializer<OffsetDateTime> {
 
   private static final DateTimeFormatter[] FORMATTERS = {
+    DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+    DateTimeFormatter.ISO_DATE_TIME,
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"),
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"),
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
   };
 
   @Override

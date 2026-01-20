@@ -2,19 +2,23 @@ package com.estapar.parking.api.dto.request;
 
 import com.estapar.parking.domain.enums.EventType;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
+@ConditionalValidation
 public class WebhookEventRequest {
 
   @NotBlank private String licensePlate;
 
   @NotNull private EventType eventType;
 
+  @JsonSerialize(using = OffsetDateTimeSerializer.class)
   @JsonDeserialize(using = OffsetDateTimeDeserializer.class)
   private OffsetDateTime entryTime;
 
+  @JsonSerialize(using = OffsetDateTimeSerializer.class)
   @JsonDeserialize(using = OffsetDateTimeDeserializer.class)
   private OffsetDateTime exitTime;
 
